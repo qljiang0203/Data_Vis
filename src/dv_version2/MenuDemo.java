@@ -32,6 +32,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.openide.util.NbBundle;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
+
 import javax.swing.JScrollPane;
 import java.awt.*;
 import java.awt.event.*;
@@ -461,26 +463,24 @@ public class MenuDemo {
 						new Label_closing("FR").getJPanel());
 			}
 		});
-		
-		/*//限制只能输入数字
-				TextField.addKeyListener(new KeyAdapter(){
-					public void keyTyped(KeyEvent e) {
-						int keyChar = e.getKeyChar();				
-						if(keyChar >= KeyEvent.VK_0 && keyChar <= KeyEvent.VK_9){
-							
-						}else{
-							e.consume(); //关键，屏蔽掉非法输入
-						}
-					}
-				});*/
-		
-		searchField.addKeyListener(new KeyAdapter(){
+
+		/*
+		 * //限制只能输入数字 TextField.addKeyListener(new KeyAdapter(){ public void
+		 * keyTyped(KeyEvent e) { int keyChar = e.getKeyChar(); if(keyChar >=
+		 * KeyEvent.VK_0 && keyChar <= KeyEvent.VK_9){
+		 * 
+		 * }else{ e.consume(); //关键，屏蔽掉非法输入 } } });
+		 */
+
+		// 限制搜索面板只能输入数字
+		searchField.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
-				int keyChar = e.getKeyChar();				
-				if(keyChar >= KeyEvent.VK_0 && keyChar <= KeyEvent.VK_9){
-					
-				}else{
-					e.consume(); //关键，屏蔽掉非法输入
+				int keyChar = e.getKeyChar();
+
+				if (keyChar >= KeyEvent.VK_0 && keyChar <= KeyEvent.VK_9) {
+
+				} else {
+					e.consume(); // 关键，屏蔽掉非法输入
 				}
 			}
 		});
@@ -488,25 +488,25 @@ public class MenuDemo {
 		// 监听搜索按钮
 		go.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String text = "";
-				System.out.println("kong");
-				//System.out.println("text");
-				try{
-				 text = searchField.getText().trim(); // 获取文本框的输入内容（去除两端空格）
-				 System.out.println("1233");
-				}catch(NumberFormatException evt){
-					System.out.println("NumberFormatException");
-				}
-				System.out.println("kong");
-				if(text != " "){
-					System.out.println("aaa");
-				int nodeId = Integer.valueOf(text).intValue();
-				
-				System.out.println("int");
-				new NodeSearch().nodeSearch(singletonObject, nodeId);
+				String text = searchField.getText().trim(); // 获取文本框的输入内容（去除两端空格）
+				try {
+					int nodeId = Integer.valueOf(text).intValue();
+					new NodeSearch().nodeSearch(singletonObject, nodeId);
+				} catch (RuntimeException evt) {
+					javax.swing.JOptionPane.showMessageDialog(null,"请输入数字！！！","提示",
+							javax.swing.JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
+
+		/*
+		 * try{
+		 * 
+		 * Integer.parseInt( this.jTextField1.getText());
+		 * }catch(RuntimeException e){
+		 * javax.swing.JOptionPane.showMessageDialog(this,"请输入数字！！","输入错误",javax
+		 * .swing.JOptionPane.ERROR_MESSAGE); }
+		 */
 
 		/*
 		 * slider9.addChangeListener(new ChangeListener() { public void
