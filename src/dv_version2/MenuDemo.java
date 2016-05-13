@@ -472,7 +472,7 @@ public class MenuDemo {
 		 * }else{ e.consume(); //关键，屏蔽掉非法输入 } } });
 		 */
 
-		// 限制搜索面板只能输入数字
+		// 监听文本框，限制搜索面板只能输入数字
 		searchField.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				int keyChar = e.getKeyChar();

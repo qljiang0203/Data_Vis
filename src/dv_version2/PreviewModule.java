@@ -15,49 +15,53 @@ import org.gephi.preview.api.PreviewProperty;
 import org.gephi.preview.api.RenderTarget;
 import org.gephi.preview.types.DependantOriginalColor;
 import dv_version2.plugins.preview.PreviewSketch1;
-import org.openide.util.Lookup;
 
 /**
  *
  * @author Administrator
  */
-public class PreviewModule { 
-        PreviewModel model;
-        PreviewController  previewController ;
 
-	PreviewModule(SingletonObject singletonobject)
-    {
-        this.model = singletonobject.getPreviewModel();
-        this.previewController = singletonobject.getpreviewController();
-        model.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-        //model.getProperties().putValue(PreviewProperty.EDGE_COLOR, new EdgeColor(Color.BLACK));
-        model.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR, new DependantOriginalColor(Color.BLACK));
-        model.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
-        model.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 30f);
-        model.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 20f);
-      //  model.getProperties().putValue(PreviewProperty.NODE_LABEL_OUTLINE_OPACITY,0.0);
-        model.getProperties().putValue(PreviewProperty.EDGE_LABEL_OUTLINE_COLOR,new DependantOriginalColor(Color.BLACK) );
-        model.getProperties().putValue(PreviewProperty.EDGE_THICKNESS, 1f);
-        model.getProperties().putValue(PreviewProperty.NODE_LABEL_FONT, model.getProperties().getFontValue(PreviewProperty.NODE_LABEL_FONT).deriveFont(8));
-        previewController.refreshPreview();
-        
-    }     
+public class PreviewModule {
 
-//Add the applet to a JFrame and display
-        public JPanel display(){
-        G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
-        PreviewSketch1 previewSketch = new PreviewSketch1(target);
-        previewController.refreshPreview();       
-        previewSketch.resetZoom();
-        
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        
-        panel.add(previewSketch, BorderLayout.CENTER);
-        panel.setVisible(true);
-        
-        //Add the applet to a JFrame and display                                                 
-      return panel;
-    }
-    
+	PreviewModel model;
+	PreviewController previewController;
+
+	public PreviewModule(SingletonObject singletonobject) {
+		
+		this.model = singletonobject.getPreviewModel();
+		this.previewController = singletonobject.getpreviewController();
+		
+		// 预览效果配置,通过PreviewModel设置展示的参数，如是否显示节点上的标签、边的颜色粗细等
+		model.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE); 
+//		model.getProperties().putValue(PreviewProperty.EDGE_COLOR, new EdgeColor(Color.BLACK));
+		model.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR, new DependantOriginalColor(Color.BLACK));
+		model.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE); // 边是否弯曲
+		model.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 30f); // 边的透明度
+		model.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 20f);
+//		model.getProperties().putValue(PreviewProperty.NODE_LABEL_OUTLINE_OPACITY,0.0);
+		model.getProperties().putValue(PreviewProperty.EDGE_LABEL_OUTLINE_COLOR,new DependantOriginalColor(Color.BLACK));
+		model.getProperties().putValue(PreviewProperty.EDGE_THICKNESS, 1f);
+		model.getProperties().putValue(PreviewProperty.NODE_LABEL_FONT,
+		model.getProperties().getFontValue(PreviewProperty.NODE_LABEL_FONT).deriveFont(8));
+		
+		previewController.refreshPreview(); // 进入refreshPreview（）方法可以发现是更新Workspace对象，也就是更新其中的数据
+
+	}
+
+	public JPanel display() {
+		
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET); // 渲染目标
+		PreviewSketch1 previewSketch = new PreviewSketch1(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout()); // 边界布局
+
+		panel.add(previewSketch, BorderLayout.CENTER);
+		panel.setVisible(true);
+
+		return panel;
+	}
+
 }

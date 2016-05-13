@@ -32,16 +32,16 @@ public class NodeSearch {
 			
 			for(Node node : Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace).getGraph().getNodes()){
 				String sNode = node.getId().toString(); 
-				temp[(int)Double.parseDouble(sNode)] = node;
+				int iNode = (int)Double.parseDouble(sNode);
+				temp[iNode] = node;
 				
+				float x = temp[iNode].x();
+				float y = temp[iNode].y();
+				temp[iNode].setPosition(0-x, 0-y);
 			}
 			
 			temp[nodeId].setColor(new Color(255,255,0)); //高亮目标节点
-			float x = temp[nodeId].x();
-			float y = temp[nodeId].y();
-			//float z = temp[nodeId].z();
 			
-			temp[nodeId].setPosition(0-x, 0-y);
 			System.out.println(temp[nodeId].getLabel());
 		}
 	}
