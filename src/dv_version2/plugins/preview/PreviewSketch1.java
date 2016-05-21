@@ -50,7 +50,6 @@ import java.awt.event.MouseWheelListener;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.gephi.preview.api.G2DTarget;
@@ -71,14 +70,14 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 	private final PreviewController previewController;
 	public static G2DTarget target;// 改为静态，便于在外部更新
 	// Geometry
-	private final Vector ref = new Vector();
-	private final Vector lastMove = new Vector();
+	private static final Vector ref = new Vector();
+	private static final Vector lastMove = new Vector();
 	// Utils
 	public static RefreshLoop refreshLoop;// 改为静态，便于在外部更新
-	private Timer wheelTimer;
-	private boolean inited = false;
-	private final boolean isRetina;
-	
+	public static Timer wheelTimer;
+	public static boolean inited = false;
+	public static boolean isRetina;
+
 	public PreviewSketch1(G2DTarget target) {
 		this.target = target;
 		refreshLoop = new RefreshLoop();
@@ -87,9 +86,9 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
 		System.out.println("在刷新画图");
-		super.paint(g);
+		super.paintComponent(g);
 
 		if (!inited) {
 			// Listeners
@@ -112,7 +111,7 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 		g.drawImage(target.getImage(), 0, 0, getWidth(), getHeight(), this);
 	}
 
-	public void setMoving(boolean moving) {
+	public static void setMoving(boolean moving) { //
 
 		target.setMoving(moving);
 	}
@@ -124,6 +123,7 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 			// refreshLoop.refreshSketch();
 
 		}
+
 		int count = e.getClickCount();
 		if (count == 2) {
 			// JOptionPane.showConfirmDialog(null, "Delelte ", "double clicked
@@ -135,15 +135,27 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 	@Override
 	public void mousePressed(MouseEvent e) {
 		previewController.sendMouseEvent(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.PRESSED));
+
+		System.out.println("press的坐标：(" + e.getX() + "," + e.getY() + ")");
+
 		ref.set(e.getX(), e.getY()); // 得到鼠标在屏幕上press的位置
+
+		System.out.println("press getTranslate前ref： " + ref.getX() + "," + ref.getY());
+
 		lastMove.set(target.getTranslate());
 
+		System.out.println("press getTranslate后lastMove： " + lastMove.getX() + "," + lastMove.getY());
 		// refreshLoop.refreshSketch();
 		// target.refresh();
 		// updateU();
+
+		System.out.println("press getTranslate后lastMove： " + lastMove.getX() + "," + lastMove.getY());
+
+		Vector currentPosition = new Vector(0.0f, 0.0f);
+		Vector screenPos = modelPositionToScreenPosition(currentPosition);
+		System.out.println(screenPos.x + "############" + screenPos.y);
 		repaint();
 
-		System.out.println("press完成后的坐标：(" + e.getX() + "," + e.getY() + ")");
 	}
 
 	// 在drag中的repaint()即target.refresh()会出现空白，单独的previewController.sendMouseEvent(buildPreviewMouseEvent(e,
@@ -162,31 +174,10 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 				transl.sub(ref);
 				transl.mult(isRetina ? 2f : 1f);
 				transl.div(target.getScaling()); // ensure const. moving speed
-													// whatever the zoom is
 				transl.add(lastMove);
-				// target.refresh();
-
-				//
-				// if (wheelTimer != null) {
-				// wheelTimer.cancel();
-				// wheelTimer = null;
-				// }
-				// wheelTimer = new Timer();
-				// wheelTimer.schedule(new TimerTask() {
-				// //延迟WHEEL_TIMER后，执行run方法
-				// @Override
-				// public void run() {
-				// setMoving(false);
-				// // refreshLoop.refreshSketch();
-				// repaint();
-				// wheelTimer = null;
-				// }
-				// }, WHEEL_TIMER);
 
 				repaint();
-
 			}
-
 		}
 	}
 
@@ -308,6 +299,41 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 		Vector pos = screenPositionToModelPosition(new Vector(mouseX, mouseY));
 
 		return new PreviewMouseEvent((int) pos.x, (int) pos.y, type, button, null);
+	}
+
+	// 把节点移至画布中心，并且保持layout结构不变
+	public void nodeMoveCenter(int nodeid, float x, float y) {
+
+		setMoving(false);
+		Vector screenPos = modelPositionToScreenPosition(new Vector(x, -y));
+		
+		Vector trans = target.getTranslate();
+		trans.set(getWidth()/2f, getHeight()/2f); // 设置要移动到的位置坐标
+		trans.sub(screenPos); // 减去目标点（起始点）相应的视窗坐标系中的位置坐标
+		trans.mult(isRetina ? 2f : 1f);
+		trans.div(target.getScaling()); // ensure const. moving speed whatever the zoom is
+		trans.add(lastMove);
+
+		refreshLoop.refreshSketch();
+		repaint();
+		
+		lastMove.set(target.getTranslate());
+	}
+
+	// 将在用户坐标系中的位置坐标转换到视窗坐标系中的位置坐标
+	private Vector modelPositionToScreenPosition(Vector modelPos) {
+ 
+		Vector center = new Vector(getWidth()/2f, getHeight()/2f); // 屏幕的中心点
+		Vector scaledCenter = Vector.mult(center, target.getScaling());
+		Vector scaledTrans = Vector.sub(center, scaledCenter);
+
+		Vector screenPos = new Vector(modelPos.x, modelPos.y);
+		
+		screenPos.add(target.getTranslate());
+		screenPos.mult(target.getScaling());
+		screenPos.add(scaledTrans);
+
+		return screenPos;
 	}
 
 	public class RefreshLoop {

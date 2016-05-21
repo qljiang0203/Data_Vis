@@ -243,7 +243,8 @@ public class MouseListenerTemplate implements PreviewMouseListener {
 
     @Override
     public void mouseReleased(PreviewMouseEvent event, PreviewProperties properties, Workspace workspace) {
-            System.out.println("释放开始");
+        System.out.println(event.x+","+event.y);    
+    	System.out.println("释放开始");
       
         	//计算释放的时候鼠标事件的坐标与点的坐标的距离，如果过小，则不会重置点的坐标
         if(nodeclicked!=null)

@@ -13,9 +13,10 @@ import org.gephi.layout.plugin.fruchterman.FruchtermanReingold;
 
 /**
  *
- * @author tang
+ * @author qljiang
  */
 public class AlgoModule {
+	
 	double gravity;
 	double repulseStrength;
 	double speed;
@@ -24,6 +25,7 @@ public class AlgoModule {
 	float stepRatio;
 
 	AlgoModule() {
+		
 		gravity = 30d;
 		repulseStrength = 12000d;
 		speed = 1d;

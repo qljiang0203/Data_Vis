@@ -32,13 +32,9 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.openide.util.NbBundle;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
-
-import javax.swing.JScrollPane;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -232,12 +228,11 @@ public class MenuDemo {
 		speed = 3d;
 		area = 30000f;
 
-		
 		slider1.setMajorTickSpacing(5000); // 设置主刻度标记的间隔
 		slider1.setMinorTickSpacing(1000); // 设置次刻度标记的间隔
 		slider1.setPaintTicks(true); // 在滑块上绘制滑道
 		slider1.setPaintLabels(true); // 在滑块上绘制标签
-		
+
 		// 添加 ChangeListener 到滑块
 		slider1.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
@@ -256,12 +251,11 @@ public class MenuDemo {
 			}
 		});
 
-		
 		slider2.setMajorTickSpacing(50);
 		slider2.setMinorTickSpacing(10);
 		slider2.setPaintTicks(true);
 		slider2.setPaintLabels(true);
-		
+
 		slider2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
@@ -278,12 +272,11 @@ public class MenuDemo {
 			}
 		});
 
-		
 		slider4.setMajorTickSpacing(100);
 		slider4.setMinorTickSpacing(20);
 		slider4.setPaintTicks(true);
 		slider4.setPaintLabels(true);
-		
+
 		slider4.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
@@ -301,12 +294,11 @@ public class MenuDemo {
 			}
 		});
 
-		
 		slider5.setMajorTickSpacing(20);
 		slider5.setMinorTickSpacing(5);
 		slider5.setPaintTicks(true);
 		slider5.setPaintLabels(true);
-		
+
 		slider5.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
@@ -323,12 +315,11 @@ public class MenuDemo {
 			}
 		});
 
-		
 		slider7.setMajorTickSpacing(10);
 		slider7.setMinorTickSpacing(2);
 		slider7.setPaintTicks(true);
 		slider7.setPaintLabels(true);
-		
+
 		slider7.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
@@ -346,12 +337,11 @@ public class MenuDemo {
 			}
 		});
 
-		
 		slider8.setMajorTickSpacing(2);
 		slider8.setMinorTickSpacing(1);
 		slider8.setPaintTicks(true);
 		slider8.setPaintLabels(true);
-		
+
 		slider8.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
@@ -369,12 +359,11 @@ public class MenuDemo {
 			}
 		});
 
-		
 		slider9.setMajorTickSpacing(5000);
 		// slider9.setMinorTickSpacing(1000);
 		slider9.setPaintTicks(true);
 		slider9.setPaintLabels(true);
-		
+
 		slider9.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
@@ -396,11 +385,11 @@ public class MenuDemo {
 	}
 
 	private void frameInit() {
-		
+
 		frame = new Frame("Data Visualization Ver0.1");
 		frame.setBounds(200, 200, 600, 500);
 		frame.setLayout(new BorderLayout()); // 边框布局
-		
+
 		menubar = new MenuBar();
 		menu = new Menu("File");
 		menuitem = new MenuItem("fileload");
@@ -411,16 +400,16 @@ public class MenuDemo {
 
 		Menu editMenu = new Menu("Edit");
 		menubar.add(editMenu);
-		
+
 		Menu viewMenu = new Menu("WorkSpace");
 		menubar.add(viewMenu);
 
 		Menu sourceMenu = new Menu("Tools");
 		menubar.add(sourceMenu);
-		
+
 		Menu refactorMenu = new Menu("Window");
 		menubar.add(refactorMenu);
-		
+
 		Menu helpMenu = new Menu("Help");
 		menubar.add(helpMenu);
 
@@ -428,7 +417,7 @@ public class MenuDemo {
 		buttonEvent();
 		// SliderEvent();
 		setLayout();
-		
+
 		frame.setVisible(true);
 	}
 
@@ -467,7 +456,6 @@ public class MenuDemo {
 			}
 		});
 
-
 		// 监听文本框，限制搜索面板只能输入数字
 		searchField.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
@@ -489,12 +477,11 @@ public class MenuDemo {
 					int nodeId = Integer.valueOf(text).intValue();
 					new NodeSearch().nodeSearch(singletonObject, nodeId);
 				} catch (RuntimeException evt) {
-					javax.swing.JOptionPane.showMessageDialog(null,"请输入数字！！！","提示",
+					javax.swing.JOptionPane.showMessageDialog(null, "请输入数字！！！", "提示",
 							javax.swing.JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
-
 
 		/*
 		 * ego.addActionListener(new ActionListener() { public void
@@ -536,7 +523,7 @@ public class MenuDemo {
 	// }
 
 	private void myEvent() {
-		
+
 		menuitem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				filedialog.setVisible(true);
@@ -566,7 +553,7 @@ public class MenuDemo {
 	}
 
 	public static void main(String[] args) {
-		
+
 		// 读取文件，获取各个控制器和模型。
 		MenuDemo menuTest = new MenuDemo();
 		// singletonObject = new SingletonObject();
@@ -574,7 +561,7 @@ public class MenuDemo {
 	}
 
 	public void setLayout() {
-		
+
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new java.awt.GridLayout());
 
@@ -658,7 +645,7 @@ public class MenuDemo {
 		 * statistic.setLayout(new BoxLayout(statistic,BoxLayout.Y_AXIS));
 		 * statistic.add(Direct); statistic.add(unDirect);
 		 */
-		
+
 		leftTabbedPane.add("Layout", excute);
 		// leftTabbedPane.add("Anlynase",statistic);
 		// leftTabbedPane.add(scrollbar);

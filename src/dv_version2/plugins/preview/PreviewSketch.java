@@ -137,7 +137,7 @@ public class PreviewSketch extends JPanel implements MouseListener, MouseWheelLi
             Vector trans = target.getTranslate();
             trans.set(e.getX(), e.getY());
             trans.sub(ref);
-            trans.mult(isRetina ? 2f : 1f);
+            //trans.mult(isRetina ? 2f : 1f);
             trans.div(target.getScaling()); // ensure const. moving speed whatever the zoom is
             trans.add(lastMove);
 
