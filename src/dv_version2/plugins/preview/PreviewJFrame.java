@@ -21,14 +21,9 @@ along with Gephi.  If not, see <http://www.gnu.org/licenses/>.
 package dv_version2.plugins.preview;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.JFrame;
-import org.gephi.graph.api.GraphController;
-import org.gephi.graph.api.Node;
 import org.gephi.io.importer.api.Container;
 import org.gephi.io.importer.api.ImportController;
 import org.gephi.io.processor.plugin.DefaultProcessor;
@@ -36,7 +31,6 @@ import org.gephi.preview.api.*;
 import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.project.api.Workspace;
-import dv_version2.plugins.preview.PreviewSketch;
 import dv_version2.plugins.preview.PreviewSketch1;
 import org.openide.util.Lookup;
 

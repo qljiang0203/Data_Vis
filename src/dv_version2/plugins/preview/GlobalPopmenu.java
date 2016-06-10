@@ -12,13 +12,18 @@ package dv_version2.plugins.preview;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import org.gephi.datalab.api.GraphElementsController;
 import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphController;
+import org.gephi.graph.api.Node;
+import org.gephi.graph.api.NodeIterable;
 import org.openide.util.Lookup;
 
 public class GlobalPopmenu {
@@ -59,26 +64,90 @@ public class GlobalPopmenu {
 	             if(niIndex==0)
 	             {
 
-	            	 MouseListenerTemplate.region=true;
+	            	 MouseListenerTemplate.region= ! MouseListenerTemplate.region ;
 	             }
 	             //执行ego点的恢复
 	             else if(niIndex==1 && NodePopmenu.egoNodes.size()!=0)
 	             {
-	            	 System.out.println("egoNodes中的点的标签："+NodePopmenu.egoNodes.getFirst().getId());
+//	            	 System.out.println("egoNodes中的点的标签："+NodePopmenu.egoNodes.getFirst().getId());
 	            	 DirectedGraph graph2=Lookup.getDefault().lookup(GraphController.class).getGraphModel().getDirectedGraph();
 	            	 GraphElementsController gec=Lookup.getDefault().lookup(GraphElementsController.class);
 //                     gec.createNode("新加入的", NodePopmenu.egoNodes.pollFirst().getId().toString(), graph2);
+//	            	 graph2.readUnlock();   
 	            	 //恢复ego点
-	            	 while(NodePopmenu.egoNodes.size()!=0)
+	            	while(NodePopmenu.egoNodes.size()!=0)//不能用isEmpty
 	            	 {
-	            	    graph2.addNode(NodePopmenu.egoNodes.pollFirst());
+//                             System.out.println("ego点的数目：。。。。。。。。。。"+NodePopmenu.egoNodes.size());
+                             Node node=NodePopmenu.egoNodes.pollLast();
+                             node.setLabel(NodePopmenu.nodesLable.pollLast());
+                            //把删除的点添加进去
+	            	            graph2.addNode(node);
+                            System.out.println("恢复出来的点的label.................................."+node.getLabel());
+//                            connectNodeToNeighbors(node, (Node[]) NodePopmenu.egoEdges.pollFirst());
+                           //把删除的线恢复出来
+                            connectNodeToNeigbors(node, NodePopmenu.egoEdges.pollLast());
 	            	 }
 	            	 
 	            	 PreviewSketch1.target.refresh();
                      PreviewSketch1.refreshLoop.refreshSketch();
+//                     System.out.println("恢复出图形后边的数目。。。。。。。。。。。。。。。"+graph2.getEdgeCount());
 	             }
 	           
 	           
 	        } 
 	    } 
-}
+          //通过边的集合将图像恢复
+          private void connectNodeToNeigbors(Node node,Edge[] edges)
+                { 
+                  DirectedGraph graph2=Lookup.getDefault().lookup(GraphController.class).getGraphModel().getDirectedGraph();
+                   for(int index=0;index<edges.length;index++)
+                   {
+                       if(isConnectable(edges[index],graph2))
+                       {
+//                                     edges[index].setWeight(1);
+                                     graph2.addEdge(edges[index]);
+                                     
+                                     
+                       }
+                   }
+                }
+           //通过点的集合将图像恢复
+          
+          
+          
+          private void connectNodeToNeighbors(Node node,Node[] nodes)
+                {
+                    DirectedGraph graph2=Lookup.getDefault().lookup(GraphController.class).getGraphModel().getDirectedGraph();
+                    for(int index=0;index<nodes.length;index++)
+                    {
+                           if(containsIn(nodes[index],graph2))
+                           {
+                            graph2.addEdge( graph2.getModel().factory().newEdge(node, nodes[index]));
+                           }
+                        }
+                 }
+          //判断是否可以将edge 加入graph中
+          private boolean isConnectable(Edge edge,Graph graph2)
+          {
+              Node nodeSource=edge.getSource();
+              Node nodeTarget=edge.getTarget();
+             
+              if( graph2.contains(nodeTarget)&& graph2.contains(nodeSource))
+                     return true;
+              return false;
+          }
+          //判断点node是否在图graph2中
+          private boolean containsIn(Node node,Graph graph2)
+                {
+                    NodeIterable nodesIterable= graph2.getNodes();
+                    Node[] nodes=nodesIterable.toArray();
+                    for(int index=0;index<nodes.length;index++)
+                          {
+                            if(node.getId().equals(nodes[index].getId()))
+                                return true;
+                          }
+                        return false;
+                }
+          }
+       
+

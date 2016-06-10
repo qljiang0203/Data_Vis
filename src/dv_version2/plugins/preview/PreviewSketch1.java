@@ -41,12 +41,15 @@
  */
 package dv_version2.plugins.preview;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,12 +59,13 @@ import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewMouseEvent;
 import org.gephi.preview.api.Vector;
+import org.gephi.project.api.ProjectController;
 import org.openide.util.Lookup;
-//import org.gephi.desktop.preview.PreviewTopComponent;
+import org.gephi.graph.api.Node;
 
 /**
  *
- * @author mbastian
+ *
  */
 public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelListener, MouseMotionListener {
 
@@ -74,21 +78,25 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 	private static final Vector lastMove = new Vector();
 	// Utils
 	public static RefreshLoop refreshLoop;// 改为静态，便于在外部更新
-	public static Timer wheelTimer;
-	public static boolean inited = false;
-	public static boolean isRetina;
+	private Timer wheelTimer;
+	private boolean inited = false;
+	private final boolean isRetina;
+	// private static ArrayList ss=new ArrayList();
+	private static float[] ss = new float[2];
+	private MouseListenerTemplate ml;
 
 	public PreviewSketch1(G2DTarget target) {
 		this.target = target;
 		refreshLoop = new RefreshLoop();
 		previewController = Lookup.getDefault().lookup(PreviewController.class);
 		isRetina = false;// PreviewTopComponent.isRetina();
+		ml = new MouseListenerTemplate();
 	}
 
 	@Override
-	public void paintComponent(Graphics g) {
+	public void paint(Graphics g) {
 		System.out.println("在刷新画图");
-		super.paintComponent(g);
+		super.paint(g);
 
 		if (!inited) {
 			// Listeners
@@ -105,13 +113,15 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 		if (target.getWidth() != width || target.getHeight() != height) {
 			target.resize(width, height);
 		}
-		// refreshLoop.refreshSketch();
+
 		target.refresh();
-		// repaint();
 		g.drawImage(target.getImage(), 0, 0, getWidth(), getHeight(), this);
+
+		// refreshLoop.refreshSketch();//定时刷屏
+		// repaint(); 闪屏的原因
 	}
 
-	public static void setMoving(boolean moving) { //
+	public void setMoving(boolean moving) {
 
 		target.setMoving(moving);
 	}
@@ -119,43 +129,79 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 	@Override
 	public void mouseClicked(MouseEvent e) {
 
-		if (previewController.sendMouseEvent(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.CLICKED))) {
-			// refreshLoop.refreshSketch();
-
-		}
-
+		// if (previewController.sendMouseEvent(buildPreviewMouseEvent(e,
+		// PreviewMouseEvent.Type.CLICKED))) {
+		// // refreshLoop.refreshSketch();
+		//
+		// }
+		ml.mouseClicked(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.CLICKED),
+				Lookup.getDefault().lookup(ProjectController.class).getCurrentWorkspace());
 		int count = e.getClickCount();
 		if (count == 2) {
 			// JOptionPane.showConfirmDialog(null, "Delelte ", "double clicked
 			// this node?", JOptionPane.YES_NO_OPTION);
-		}
 
+
+			MouseListenerTemplate mt = new MouseListenerTemplate();
+			mt.setData(0);
+
+			for (Map.Entry<String, Node> map : mt.node1.entrySet()) {
+
+				Node nn = map.getValue();
+				String id = map.getKey();
+				nn.setColor(mt.color.get(id));
+				refreshLoop.refreshSketch();
+			}
+
+
+
+			mt.node1.clear();
+			mt.color.clear();
+			refreshLoop.refreshSketch();
+			/*
+			 * Node[] nc= mt.getCo1(); ArrayList ne=mt.getCo(); //多选的集合
+			 * ArrayList bt=mt.getAL(); ArrayList ct=mt.getCoo(); int a=0;
+			 * //单点颜色恢复
+			 * 
+			 * if(ne.isEmpty()==false){
+			 * 
+			 * for(int i=0;i<nc.length;i++){ Node nno=nc[i];
+			 * nno.setColor((Color) ne.get(i)); //refreshLoop.refreshSketch();
+			 * 
+			 * } }
+			 * 
+			 * 
+			 * //多选颜色恢复 if(!bt.isEmpty()){ for(int i=0;i<bt.size();i++){ Node[]
+			 * ttj=(Node[]) bt.get(i); for(int j=0;j<ttj.length;j++){ Node
+			 * nn=ttj[j];
+			 * 
+			 * nn.setColor((Color) ct.get(a)); System.out.println((Color)
+			 * ct.get(a)); a++; //refreshLoop.refreshSketch(); }
+			 * 
+			 * }
+			 * 
+			 * mt.clear(); } }
+			 */
+		}
 	}
+
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		previewController.sendMouseEvent(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.PRESSED));
-
-		System.out.println("press的坐标：(" + e.getX() + "," + e.getY() + ")");
-
+		// previewController.sendMouseEvent(buildPreviewMouseEvent(e,
+		// PreviewMouseEvent.Type.PRESSED))
+		ml.mousePressed(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.PRESSED),
+				Lookup.getDefault().lookup(ProjectController.class).getCurrentWorkspace());
+		;
 		ref.set(e.getX(), e.getY()); // 得到鼠标在屏幕上press的位置
-
-		System.out.println("press getTranslate前ref： " + ref.getX() + "," + ref.getY());
-
 		lastMove.set(target.getTranslate());
 
-		System.out.println("press getTranslate后lastMove： " + lastMove.getX() + "," + lastMove.getY());
 		// refreshLoop.refreshSketch();
 		// target.refresh();
 		// updateU();
+		// repaint();
 
-		System.out.println("press getTranslate后lastMove： " + lastMove.getX() + "," + lastMove.getY());
-
-		Vector currentPosition = new Vector(0.0f, 0.0f);
-		Vector screenPos = modelPositionToScreenPosition(currentPosition);
-		System.out.println(screenPos.x + "############" + screenPos.y);
-		repaint();
-
+		System.out.println("press完成后的坐标：(" + e.getX() + "," + e.getY() + ")");
 	}
 
 	// 在drag中的repaint()即target.refresh()会出现空白，单独的previewController.sendMouseEvent(buildPreviewMouseEvent(e,
@@ -166,33 +212,118 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 		System.out.println("拖拽进入");
 
 		if (!MouseListenerTemplate.innode && !MouseListenerTemplate.inedge && !MouseListenerTemplate.region) {
-			if (previewController.sendMouseEvent(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.DRAGGED))) {
+			// if (previewController.sendMouseEvent(buildPreviewMouseEvent(e,
+			// PreviewMouseEvent.Type.DRAGGED))) {
+			ml.mouseDragged(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.DRAGGED),
+					Lookup.getDefault().lookup(ProjectController.class).getCurrentWorkspace());
 
-				setMoving(false); // 与边的显示有关，如果改为true,边就不显示了
-				Vector transl = target.getTranslate();
-				transl.set(e.getX(), e.getY());
-				transl.sub(ref);
-				transl.mult(isRetina ? 2f : 1f);
-				transl.div(target.getScaling()); // ensure const. moving speed
-				transl.add(lastMove);
+			setMoving(false); // 与边的显示有关，如果改为true,边就不显示了
 
-				repaint();
-			}
+			// 移动整幅图
+			Vector transl = target.getTranslate();
+			transl.set(e.getX(), e.getY());
+			transl.sub(ref);
+			transl.mult(isRetina ? 2f : 1f);
+			transl.div(target.getScaling()); // ensure const. moving speed
+												// whatever the zoom is
+			transl.add(lastMove);
+			target.refresh();
+			refreshLoop.refreshSketch();
+
+			// }
+
 		}
+	}
+
+	public void nodeMoveCenter(float x, float y) {
+
+		setMoving(false);
+
+		Vector trans = target.getTranslate();
+
+		Vector currentPosition = new Vector(x, -y);
+		Vector screenPos = modelPositionToScreenPosition(currentPosition);
+
+
+		System.out.println(screenPos.getX() + "########!!!!!" + screenPos.getY());
+
+		Vector m = screenPositionToModelPosition(screenPos);
+
+
+
+
+		System.out.println(m.getX() + "xx" + x + "########*****" + m.getY() + "yy" + y);
+		trans.set(getWidth() / 2f, getHeight() / 2f);
+
+
+		trans.set(getWidth()/2f, getHeight()/2f);
+
+		trans.sub(screenPos);
+		trans.mult(isRetina ? 2f : 1f);
+		trans.div(target.getScaling()); // ensure const. moving speed
+										// whatever the zoom is
+		trans.add(lastMove);
+
+		refreshLoop.refreshSketch();
+		repaint();
+
+		lastMove.set(target.getTranslate());
+	
+
+
+
+		
+	}
+
+	// 将在模型中的位置坐标转换到屏幕上的位置坐标
+	private Vector modelPositionToScreenPosition(Vector modelPos) {
+
+		Vector center = new Vector(getWidth() / 2f, getHeight() / 2f);// 屏幕的原点，即中心点
+		Vector scaledCenter = Vector.mult(center, target.getScaling());
+		Vector scaledTrans = Vector.sub(center, scaledCenter);
+
+		Vector screenPos = new Vector(modelPos.x, modelPos.y);
+
+		/*
+		 * screenPos.add(scaledTrans); screenPos.sub(scaledCenter);
+		 * screenPos.add(center);
+		 */
+
+		screenPos.add(target.getTranslate());
+		screenPos.mult(target.getScaling());
+		screenPos.add(scaledTrans);
+
+		return screenPos;
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if (!previewController.sendMouseEvent(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.RELEASED))) {
-			// setMoving(false);
-		}
+
+		// if (!previewController.sendMouseEvent(buildPreviewMouseEvent(e,
+		// PreviewMouseEvent.Type.RELEASED))) {
+		ml.mouseReleased(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.RELEASED),
+				Lookup.getDefault().lookup(ProjectController.class).getCurrentWorkspace());
+		lastMove.set(target.getTranslate());/////////////
+		// setMoving(false);
+		// System.out.println("----------测试释放");
+		// }
+
+		// if (!previewController.sendMouseEvent(buildPreviewMouseEvent(e,
+		// PreviewMouseEvent.Type.RELEASED))) {
+		ml.mouseReleased(buildPreviewMouseEvent(e, PreviewMouseEvent.Type.RELEASED),
+				Lookup.getDefault().lookup(ProjectController.class).getCurrentWorkspace());
+		
+		lastMove.set(target.getTranslate());
+		
+
 		// 如果击中的不是一个点，并且是右键，则弹出全局菜单,如果右击的是一个点，则弹出关于点的局部菜单,如果右击的是一条线，则弹出来关于线的局部菜单
 		if (e.isPopupTrigger()) {
 			// 如果点中点
-			if (MouseListenerTemplate.innode) {
+			if (MouseListenerTemplate.innode || MouseListenerTemplate.inNode) {
 
 				new NodePopmenu().popupMenu.show(e.getComponent(), e.getX(), e.getY());
 				MouseListenerTemplate.innode = false;
+
 			}
 			// 如果点中线
 			else if (MouseListenerTemplate.inedge) {
@@ -203,6 +334,12 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 			// 如果点中空白地方
 			else
 				new GlobalPopmenu().popupMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+
+		// 框选后的菜单
+		if (MouseListenerTemplate.regionShow) {
+			new RegionChoosePopmenu().popupMenu.show(e.getComponent(), e.getX(), e.getY());
+			MouseListenerTemplate.regionShow = false;
 		}
 
 		// refreshLoop.refreshSketch();
@@ -225,25 +362,72 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 			return;
 		}
 		float way = -e.getUnitsToScroll() / Math.abs(e.getUnitsToScroll());
-		target.setScaling(target.getScaling() * (way > 0 ? 2f : 0.5f));// 获取滚轮
-		setMoving(true);
+
+		System.out.println(target.getHeight() + "##" + target.getWidth());
+
+		float x = e.getX();
+		float y = e.getY();
+
+		if (ss == null) {
+			codeMovenew(e.getX(), e.getY());
+			// ss.add(x);
+			// ss.add(y);
+			ss[0] = x;
+			ss[1] = y;
+		} else if (ss[0] != x && ss[1] != y) {
+			codeMovenew(e.getX(), e.getY());
+			// ss.clear();
+			// ss.add(x);
+			// ss.add(y);
+			ss[0] = x;
+			ss[1] = y;
+		}
+
+		target.setScaling(target.getScaling() * (way > 0 ? 2f : 0.5f));
+
+		System.out.println(target.getHeight() + "##" + target.getWidth());
+
 		if (wheelTimer != null) {
 			wheelTimer.cancel();
 			wheelTimer = null;
 		}
 		wheelTimer = new Timer();
-		wheelTimer.schedule(new TimerTask() { // 延迟WHEEL_TIMER后，执行run方法
+		wheelTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				setMoving(false);
-				// refreshLoop.refreshSketch();
-				repaint();
+				refreshLoop.refreshSketch();
 				wheelTimer = null;
 			}
-		}, 0);
-		// refreshLoop.refreshSketch();
-		// target.refresh();
+		}, WHEEL_TIMER);
+		refreshLoop.refreshSketch();
+	}
+
+	public void codeMovenew(float x, float y) {
+
+		setMoving(false);
+		Vector trans = target.getTranslate();
+
+		// Vector currentPosition = new Vector(x, -y);
+		// Vector screenPos = modelPositionToScreenPosition(currentPosition);
+		Vector screenPos = new Vector(x, y);
+		System.out.println(screenPos.getX() + "########!!!!!" + screenPos.getY());
+
+		Vector m = screenPositionToModelPosition(screenPos);
+
+		System.out.println(m.getX() + "xx" + x + "########*****" + m.getY() + "yy" + y);
+		trans.set(getWidth() / 2f, getHeight() / 2f);
+
+		trans.sub(screenPos);
+		trans.mult(isRetina ? 2f : 1f);
+		trans.div(target.getScaling()); // ensure const. moving speed
+										// whatever the zoom is
+		trans.add(lastMove);
+
+		refreshLoop.refreshSketch();
 		repaint();
+		lastMove.set(target.getTranslate());
+
 	}
 
 	@Override
@@ -299,41 +483,6 @@ public class PreviewSketch1 extends JPanel implements MouseListener, MouseWheelL
 		Vector pos = screenPositionToModelPosition(new Vector(mouseX, mouseY));
 
 		return new PreviewMouseEvent((int) pos.x, (int) pos.y, type, button, null);
-	}
-
-	// 把节点移至画布中心，并且保持layout结构不变
-	public void nodeMoveCenter(int nodeid, float x, float y) {
-
-		setMoving(false);
-		Vector screenPos = modelPositionToScreenPosition(new Vector(x, -y));
-		
-		Vector trans = target.getTranslate();
-		trans.set(getWidth()/2f, getHeight()/2f); // 设置要移动到的位置坐标
-		trans.sub(screenPos); // 减去目标点（起始点）相应的视窗坐标系中的位置坐标
-		trans.mult(isRetina ? 2f : 1f);
-		trans.div(target.getScaling()); // ensure const. moving speed whatever the zoom is
-		trans.add(lastMove);
-
-		refreshLoop.refreshSketch();
-		repaint();
-		
-		lastMove.set(target.getTranslate());
-	}
-
-	// 将在用户坐标系中的位置坐标转换到视窗坐标系中的位置坐标
-	private Vector modelPositionToScreenPosition(Vector modelPos) {
- 
-		Vector center = new Vector(getWidth()/2f, getHeight()/2f); // 屏幕的中心点
-		Vector scaledCenter = Vector.mult(center, target.getScaling());
-		Vector scaledTrans = Vector.sub(center, scaledCenter);
-
-		Vector screenPos = new Vector(modelPos.x, modelPos.y);
-		
-		screenPos.add(target.getTranslate());
-		screenPos.mult(target.getScaling());
-		screenPos.add(scaledTrans);
-
-		return screenPos;
 	}
 
 	public class RefreshLoop {
